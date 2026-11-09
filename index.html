@@ -24,7 +24,6 @@
     .logo-area h1 { font-size: 1.2rem; color: var(--text); font-weight: 800; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
     .logo-area h1 span { color: var(--accent); }
     
-    /* Бейдж с поддержкой админского клика */
     .badge { background: rgba(56, 189, 248, 0.1); color: var(--accent); font-size: 0.75rem; padding: 5px 12px; border-radius: 30px; font-weight: 700; border: 1px solid rgba(56, 189, 248, 0.2); user-select: none; transition: all 0.2s; }
 
     .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 18px; margin-bottom: 14px; box-shadow: 0 8px 25px rgba(0,0,0,0.25); }
@@ -70,6 +69,30 @@
     #pdf-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; padding: 10px; overflow-y: auto; backdrop-filter: blur(5px); }
     .modal-content { background: #ffffff; color: #000000; max-width: 600px; margin: 20px auto; padding: 30px; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; }
     .close-modal { position: absolute; top: 15px; right: 15px; background: #f1f5f9; color: #0f172a; border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+
+    /* ИДЕАЛЬНЫЕ СТИЛИ ДЛЯ ПЕЧАТИ В PDF */
+    @media print {
+      body { background: #ffffff !important; color: #000000 !important; padding: 0 !important; }
+      .container { display: none !important; } /* Скрываем веб-интерфейс */
+      
+      #pdf-modal { 
+        display: block !important; 
+        position: static !important; 
+        background: transparent !important; 
+        padding: 0 !important; 
+        overflow: visible !important; 
+      }
+      .modal-content { 
+        box-shadow: none !important; 
+        margin: 0 !important; 
+        width: 100% !important; 
+        max-width: 100% !important; 
+        padding: 0 !important; 
+      }
+      .close-modal, .modal-content > .btn-primary { 
+        display: none !important; 
+      }
+    }
   </style>
 </head>
 <body>
@@ -79,7 +102,6 @@
     <div class="logo-area">
       <h1>Contractor<span>Estimate</span></h1>
     </div>
-    <!-- Секретный админский клик по бейджу -->
     <span class="badge" id="user-status" onclick="toggleAdminPro()" title="FREE PLAN">FREE PLAN</span>
   </header>
 
@@ -144,7 +166,6 @@
 
     <div class="price-display" id="price-text">$9.99 <span>/ month</span></div>
 
-    <!-- Кнопка оплаты с динамическим href -->
     <a href="https://contractor-estimate-pro-app.lemonsqueezy.com/checkout/buy/79dd0b9e-3536-498e-838e-dcf16dc8ce4f" id="pro-checkout-btn" class="btn-pro" target="_blank">
       ⭐ Upgrade to PRO Now
     </a>
@@ -164,7 +185,7 @@
     
     <div class="pdf-actions" id="pdf-actions">
       <button class="btn-pdf-preview" onclick="openPDFPreview()">👁️ Preview Official PDF</button>
-      <button class="btn-pdf-download" onclick="window.print()">📥 Print / Save PDF</button>
+      <button class="btn-pdf-download" onclick="triggerPDFPrint()">📥 Print / Save PDF</button>
     </div>
   </div>
 </div>
@@ -210,8 +231,8 @@
     </div>
 
     <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; color: #94a3b8; font-size: 10px;">
-      <span>Generated securely via ContractorEstimate Pro</span>
-      <span>www.contractorestimate.pro</span>
+      <span>Generated securely via Contractor Estimate Pro</span>
+      <span>contractor-estimate-pro-96lh.vercel.app</span>
     </div>
 
     <button class="btn-primary" style="margin-top: 15px;" onclick="window.print()">Print / Export PDF Now</button>
@@ -231,7 +252,6 @@
     yearly: 'https://contractor-estimate-pro-app.lemonsqueezy.com/checkout/buy/4ae193d0-eba2-4fa3-88f0-52c683122003'
   };
 
-  // Сохранение пользовательских данных
   function saveUserData() {
     const data = {
       compName: document.getElementById('comp-name').value,
@@ -243,7 +263,6 @@
     localStorage.setItem('contractor_pro_data', JSON.stringify(data));
   }
 
-  // Загрузка данных + проверка админского статуса PRO
   function loadUserData() {
     const saved = localStorage.getItem('contractor_pro_data');
     if (saved) {
@@ -262,13 +281,11 @@
       }
     }
 
-    // Проверяем, активирован ли админский PRO
     if (localStorage.getItem('contractor_pro_admin') === 'true') {
       applyAdminProUI();
     }
   }
 
-  // Переключение админского режима по клику на бейдж
   function toggleAdminPro() {
     const isPro = localStorage.getItem('contractor_pro_admin') === 'true';
     if (!isPro) {
@@ -277,11 +294,10 @@
       alert('👑 Admin PRO activated!');
     } else {
       localStorage.setItem('contractor_pro_admin', 'false');
-      location.reload(); // Перезагружаем страницу, чтобы вернуть стандартный вид
+      location.reload();
     }
   }
 
-  // Применение стилей админского PRO
   function applyAdminProUI() {
     const statusEl = document.getElementById('user-status');
     statusEl.innerText = 'PRO ADMIN';
@@ -390,6 +406,16 @@
   }
 
   function openPDFPreview() {
+    fillPDFModal();
+    document.getElementById('pdf-modal').style.display = 'block';
+  }
+
+  function triggerPDFPrint() {
+    fillPDFModal();
+    window.print();
+  }
+
+  function fillPDFModal() {
     const compName = document.getElementById('comp-name').value || 'Professional Contractor';
     const compContacts = document.getElementById('comp-contacts').value || '';
     const clientInfo = document.getElementById('client-info').value || 'Valued Client';
@@ -425,7 +451,6 @@
     });
 
     document.getElementById('modal-total-sum').innerText = `Total Due: $${total}`;
-    document.getElementById('pdf-modal').style.display = 'block';
   }
 
   function closePDFPreview() {
