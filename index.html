@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ContractorEstimate Pro — SaaS Estimate Generator</title>
+  
+  <!-- Lemon Squeezy Overlay Checkout Script -->
+  <script src="https://assets.lemonsqueezy.com/checkout.js" defer></script>
+
   <style>
     :root {
       --bg: #07090e;
@@ -50,7 +54,8 @@
     .save-badge { background: var(--success); color: #000; font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; font-weight: 800; margin-left: 4px; }
     .price-display { font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 14px; }
     .price-display span { font-size: 0.85rem; color: var(--text-muted); font-weight: 400; }
-    .btn-pro { width: 100%; background: linear-gradient(135deg, #6366f1, #4f46e5); color: #ffffff; border: none; padding: 13px; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 0.95rem; box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4); }
+    
+    .btn-pro { display: inline-block; width: 100%; background: linear-gradient(135deg, #6366f1, #4f46e5); color: #ffffff; border: none; padding: 13px; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 0.95rem; text-decoration: none; box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4); text-align: center; }
 
     .pdf-actions { display: none; margin-top: 10px; gap: 10px; }
     .btn-pdf-preview { width: 100%; background: #3b82f6; color: #fff; border: none; padding: 13px; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
@@ -128,7 +133,7 @@
     <button class="btn-primary" onclick="addItem()">+ Add Item to Estimate</button>
   </div>
 
-  <!-- 4. Тарифная сетка PRO -->
+  <!-- 4. Тарифная сетка PRO с модальными ссылками Lemon Squeezy -->
   <div class="pricing-card" id="pricing-block">
     <div class="pricing-header">🔒 Unlock Official PDF Invoices & Logo</div>
     <div class="pricing-sub">Get branded PDF export with your logo & unlimited estimates</div>
@@ -139,7 +144,15 @@
     </div>
 
     <div class="price-display" id="price-text">$9.99 <span>/ month</span></div>
-    <button class="btn-pro" onclick="simulateSubscribe()">⭐ Upgrade to PRO Now</button>
+
+    <!-- Прямые кнопки Lemon Squeezy Checkout -->
+    <a href="https://contractor-estimate-pro-app.lemonsqueezy.com/checkout/buy/79dd0b9e-3536-498e-838e-dcf16dc8ce4f" id="buy-btn-monthly" class="lemonsqueezy-button btn-pro">
+      ⭐ Upgrade to PRO Now ($9.99/mo)
+    </a>
+
+    <a href="https://contractor-estimate-pro-app.lemonsqueezy.com/checkout/buy/4ae193d0-eba2-4fa3-88f0-52c683122003" id="buy-btn-yearly" class="lemonsqueezy-button btn-pro" style="display: none;">
+      ⭐ Upgrade to PRO Now ($79.00/yr)
+    </a>
   </div>
 
   <!-- 5. Итоги и экспорт -->
@@ -161,7 +174,7 @@
   </div>
 </div>
 
-<!-- Модальное окно предпросмотра PDF с брендовой подписью внизу -->
+<!-- Модальное окно предпросмотра PDF -->
 <div id="pdf-modal">
   <div class="modal-content">
     <button class="close-modal" onclick="closePDFPreview()">✕</button>
@@ -201,7 +214,6 @@
       Total: $0
     </div>
 
-    <!-- Брендовая подпись внизу документа (вирусный маркетинг SaaS) -->
     <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; color: #94a3b8; font-size: 10px;">
       <span>Generated securely via ContractorEstimate Pro</span>
       <span>www.contractorestimate.pro</span>
@@ -216,7 +228,6 @@
     { name: "Rough-in Electrical Wiring", qty: 1, price: 350 },
     { name: "Install 15A Outlets", qty: 8, price: 45 }
   ];
-  let selectedPlan = 'monthly';
   let logoSrc = '';
 
   document.getElementById('comp-logo').addEventListener('change', function(e) {
@@ -232,30 +243,23 @@
   });
 
   function selectPlan(plan) {
-    selectedPlan = plan;
     document.getElementById('btn-monthly').classList.remove('active');
     document.getElementById('btn-yearly').classList.remove('active');
+
+    const monthlyBtn = document.getElementById('buy-btn-monthly');
+    const yearlyBtn = document.getElementById('buy-btn-yearly');
 
     if (plan === 'monthly') {
       document.getElementById('btn-monthly').classList.add('active');
       document.getElementById('price-text').innerHTML = '$9.99 <span>/ month</span>';
+      monthlyBtn.style.display = 'inline-block';
+      yearlyBtn.style.display = 'none';
     } else {
       document.getElementById('btn-yearly').classList.add('active');
       document.getElementById('price-text').innerHTML = '$79.00 <span>/ year ($6.58/mo)</span>';
+      monthlyBtn.style.display = 'none';
+      yearlyBtn.style.display = 'inline-block';
     }
-  }
-
-  function simulateSubscribe() {
-    alert(`[Lemon Squeezy Checkout]\nRedirecting to secure payment for PRO plan...`);
-    
-    document.getElementById('user-status').innerText = 'PRO MEMBER';
-    document.getElementById('user-status').style.background = 'rgba(16, 185, 129, 0.2)';
-    document.getElementById('user-status').style.color = '#10b981';
-    document.getElementById('user-status').style.borderColor = '#10b981';
-    
-    document.getElementById('pricing-block').style.display = 'none';
-    document.getElementById('pdf-actions').style.display = 'grid';
-    alert('🎉 Subscription active! Logo upload & Official PDF Generator unlocked.');
   }
 
   function addItem() {
@@ -367,6 +371,8 @@
 
   window.onload = function() {
     renderItems();
+    // Обработчик события успешной оплаты от Lemon Squeezy
+    window.createLemonSqueezy && window.createLemonSqueezy();
   };
 </script>
 </body>
