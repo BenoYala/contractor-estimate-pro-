@@ -23,7 +23,9 @@
     header { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); border: 1px solid var(--card-border); padding: 16px 20px; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
     .logo-area h1 { font-size: 1.2rem; color: var(--text); font-weight: 800; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
     .logo-area h1 span { color: var(--accent); }
-    .badge { background: rgba(56, 189, 248, 0.1); color: var(--accent); font-size: 0.75rem; padding: 5px 12px; border-radius: 30px; font-weight: 700; border: 1px solid rgba(56, 189, 248, 0.2); }
+    
+    /* Бейдж с поддержкой админского клика */
+    .badge { background: rgba(56, 189, 248, 0.1); color: var(--accent); font-size: 0.75rem; padding: 5px 12px; border-radius: 30px; font-weight: 700; border: 1px solid rgba(56, 189, 248, 0.2); user-select: none; transition: all 0.2s; }
 
     .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 18px; margin-bottom: 14px; box-shadow: 0 8px 25px rgba(0,0,0,0.25); }
     .card-title { font-size: 0.8rem; margin-bottom: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
@@ -77,7 +79,8 @@
     <div class="logo-area">
       <h1>Contractor<span>Estimate</span></h1>
     </div>
-    <span class="badge" id="user-status">FREE PLAN</span>
+    <!-- Секретный админский клик по бейджу -->
+    <span class="badge" id="user-status" onclick="toggleAdminPro()" title="FREE PLAN">FREE PLAN</span>
   </header>
 
   <!-- 1. Данные компании + Логотип -->
@@ -228,7 +231,7 @@
     yearly: 'https://contractor-estimate-pro-app.lemonsqueezy.com/checkout/buy/4ae193d0-eba2-4fa3-88f0-52c683122003'
   };
 
-  // Сохранение данных в память браузера
+  // Сохранение пользовательских данных
   function saveUserData() {
     const data = {
       compName: document.getElementById('comp-name').value,
@@ -240,7 +243,7 @@
     localStorage.setItem('contractor_pro_data', JSON.stringify(data));
   }
 
-  // Загрузка данных из памяти браузера при старте
+  // Загрузка данных + проверка админского статуса PRO
   function loadUserData() {
     const saved = localStorage.getItem('contractor_pro_data');
     if (saved) {
@@ -258,6 +261,35 @@
         console.error('Error loading saved data', e);
       }
     }
+
+    // Проверяем, активирован ли админский PRO
+    if (localStorage.getItem('contractor_pro_admin') === 'true') {
+      applyAdminProUI();
+    }
+  }
+
+  // Переключение админского режима по клику на бейдж
+  function toggleAdminPro() {
+    const isPro = localStorage.getItem('contractor_pro_admin') === 'true';
+    if (!isPro) {
+      localStorage.setItem('contractor_pro_admin', 'true');
+      applyAdminProUI();
+      alert('👑 Admin PRO activated!');
+    } else {
+      localStorage.setItem('contractor_pro_admin', 'false');
+      location.reload(); // Перезагружаем страницу, чтобы вернуть стандартный вид
+    }
+  }
+
+  // Применение стилей админского PRO
+  function applyAdminProUI() {
+    const statusEl = document.getElementById('user-status');
+    statusEl.innerText = 'PRO ADMIN';
+    statusEl.style.background = 'rgba(16, 185, 129, 0.2)';
+    statusEl.style.color = '#10b981';
+    statusEl.style.borderColor = '#10b981';
+    document.getElementById('pricing-block').style.display = 'none';
+    document.getElementById('pdf-actions').style.display = 'grid';
   }
 
   document.getElementById('comp-logo').addEventListener('change', function(e) {
@@ -369,7 +401,7 @@
 
     const logoContainer = document.getElementById('modal-logo-container');
     if (logoSrc) {
-      logoContainer.innerHTML = `<img src="${logoSrc}" style="width: 50px; height: 50px; object-object: cover; border-radius: 8px; border: 1px solid #cbd5e1;">`;
+      logoContainer.innerHTML = `<img src="${logoSrc}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1;">`;
     } else {
       logoContainer.innerHTML = '';
     }
